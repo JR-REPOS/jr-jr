@@ -1,0 +1,2278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Api-Key Vault - JR</title>
+    <script src="https://js.puter.com/v2/"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --radius: 14px;
+            --radius-sm: 10px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #60a5fa;
+            --primary-light: #1e3a5f;
+            --border: #334155;
+            --danger-light: #451a1a;
+            --success-light: #064e3b;
+            --warning-light: #451a08;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+        }
+
+        /* Compact Mode Variables */
+        :root {
+            --card-padding: 14px;
+            --card-gap: 8px;
+            --section-gap: 12px;
+            --header-font: 12px;
+            --body-font: 14px;
+            --small-font: 13px;
+        }
+
+        body.compact {
+            --card-padding: 10px;
+            --card-gap: 5px;
+            --section-gap: 8px;
+            --header-font: 11px;
+            --body-font: 13px;
+            --small-font: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: var(--card);
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+
+        .header-left h1 {
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Unified Header Buttons */
+        .header-btn {
+            width: 38px;
+            height: 38px;
+            padding: 0;
+            border-radius: var(--radius-sm);
+            font-size: 18px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-btn:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .header-btn.primary-btn {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            font-size: 20px;
+        }
+
+        .header-btn.primary-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .header-btn.settings-btn {
+            transition: transform 0.3s ease;
+        }
+
+        .header-btn.settings-btn:hover {
+            transform: rotate(45deg);
+        }
+
+        /* User Badge Button */
+        .user-btn {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px 6px 8px;
+            background: var(--primary-light);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            color: var(--text);
+            height: 38px;
+        }
+
+        .user-btn:hover { border-color: var(--primary); }
+        .user-btn.visible { display: flex; }
+
+        .user-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .user-name-text {
+            font-size: 13px;
+            font-weight: 600;
+            max-width: 90px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* User Popup */
+        .user-popup-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+        }
+
+        .user-popup-overlay.active { display: block; }
+
+        .user-popup {
+            position: absolute;
+            top: 60px;
+            right: 16px;
+            width: 280px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            padding: 20px;
+            z-index: 501;
+            animation: popupIn 0.2s ease;
+        }
+
+        @keyframes popupIn {
+            from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .user-popup-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .user-popup-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .user-popup-name {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .user-popup-email {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .usage-section {
+            margin-bottom: 16px;
+        }
+
+        .usage-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .usage-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 13px;
+        }
+
+        .usage-item .label { color: var(--text-muted); }
+        .usage-item .value { font-weight: 600; font-family: 'DM Mono', monospace; font-size: 12px; }
+
+        .usage-bar-bg {
+            height: 6px;
+            background: var(--bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .usage-bar-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+            min-width: 0%;
+        }
+
+        .btn-signout {
+            width: 100%;
+            padding: 10px;
+            background: var(--danger-light);
+            color: var(--danger);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-signout:hover { filter: brightness(0.95); }
+
+        /* Container */
+        .container {
+            max-width: 620px;
+            margin: 0 auto;
+            padding: 16px;
+            flex: 1;
+        }
+
+        body.compact .container { padding: 10px; }
+
+        /* Controls */
+        .controls-row {
+            display: grid;
+            grid-template-columns: 1fr 140px;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        body.compact .controls-row { margin-bottom: 12px; }
+
+        .input, .select {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        body.compact .input, body.compact .select { padding: 8px 12px; font-size: 13px; }
+
+        .input:focus, .select:focus { border-color: var(--primary); }
+
+        /* Provider Groups */
+        .provider-group { margin-bottom: var(--section-gap); }
+
+        .group-header {
+            background: var(--card);
+            padding: 14px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: var(--header-font);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        body.compact .group-header { padding: 10px 12px; }
+
+        .group-header:hover { border-color: var(--primary); }
+
+        .group-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .group-header .arrow {
+            transition: transform 0.2s;
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .expanded .group-header .arrow { transform: rotate(90deg); }
+
+        .group-header .count {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .group-header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .group-usage-badge {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: var(--bg);
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .group-usage-badge .usage-icon { font-size: 12px; }
+        .group-usage-badge.high { color: var(--warning); background: var(--warning-light); }
+        .group-usage-badge.very-high { color: var(--danger); background: var(--danger-light); }
+
+        .group-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .expanded .group-content {
+            max-height: 2000px;
+            padding-top: var(--card-gap);
+        }
+
+        /* Key Cards */
+        .key-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: var(--card-padding);
+            margin-bottom: var(--card-gap);
+            transition: all 0.2s;
+            animation: fadeUp 0.3s ease forwards;
+            opacity: 0;
+        }
+
+        .key-card:hover { border-color: var(--primary); }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        body.compact .card-top { margin-bottom: 6px; }
+
+        .card-name {
+            font-weight: 600;
+            font-size: var(--body-font);
+        }
+
+        .acc-tag {
+            font-size: 10px;
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 4px;
+            display: inline-block;
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .uses-badge {
+            font-size: 11px;
+            background: var(--bg);
+            color: var(--text-muted);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .uses-badge .uses-icon { font-size: 11px; }
+
+        /* Key Value Row */
+        .key-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        body.compact .key-row { margin-bottom: 8px; }
+
+        .key-val {
+            flex: 1;
+            background: var(--bg);
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            word-break: break-all;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        body.compact .key-val { padding: 8px 10px; font-size: 11px; }
+
+        .btn-eye {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 8px;
+            font-size: 16px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .btn-eye:hover { background: var(--primary-light); border-color: var(--primary); }
+
+        /* Card Bottom Actions */
+        .card-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-card-action {
+            flex: 1;
+            padding: 8px 0;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-family: inherit;
+        }
+
+        body.compact .btn-card-action { padding: 6px 0; font-size: 11px; }
+
+        .btn-card-action:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+        .btn-card-action.danger:hover { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
+        .btn-card-action .action-icon { font-size: 13px; }
+
+        /* Modals */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: overlayIn 0.2s ease;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        @keyframes overlayIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--card);
+            width: 100%;
+            max-width: 440px;
+            border-radius: 20px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-lg);
+            animation: modalIn 0.25s ease;
+            overflow: hidden;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .modal-body::-webkit-scrollbar {
+            display: none;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        /* Settings modal special scroll */
+        .settings-scroll {
+            max-height: 60vh;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .settings-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            margin-bottom: 4px;
+        }
+
+        .modal-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .modal-section {
+            padding: 16px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .modal-section:first-of-type { border-top: none; padding-top: 0; }
+
+        .modal-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .setting-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .setting-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Theme & Compact Toggle */
+        .toggle-group {
+            display: flex;
+            background: var(--bg);
+            border-radius: 10px;
+            padding: 3px;
+            border: 1px solid var(--border);
+        }
+
+        .toggle-option {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: inherit;
+        }
+
+        .toggle-option.active {
+            background: var(--card);
+            color: var(--text);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Switch Toggle */
+        .switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .switch-slider::before {
+            content: '';
+            position: absolute;
+            height: 18px;
+            width: 18px;
+            left: 2px;
+            bottom: 2px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .switch input:checked + .switch-slider {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .switch input:checked + .switch-slider::before {
+            transform: translateX(20px);
+            background: white;
+        }
+
+        /* Settings Buttons */
+        .settings-action-btn {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: inherit;
+            margin-bottom: 8px;
+        }
+
+        .settings-action-btn:hover { border-color: var(--primary); background: var(--primary-light); }
+        .settings-action-btn:last-child { margin-bottom: 0; }
+
+        .settings-action-btn .icon { font-size: 16px; }
+        .settings-action-btn .label { flex: 1; text-align: left; }
+        .settings-action-btn .arrow-right { color: var(--text-muted); font-size: 12px; }
+
+        .settings-action-btn.danger:hover { border-color: var(--danger); background: var(--danger-light); }
+        .settings-action-btn.danger { color: var(--danger); }
+
+        .settings-action-btn.success { background: var(--success-light); border-color: var(--success); color: var(--success); }
+        .settings-action-btn.success:hover { filter: brightness(0.95); }
+
+        .settings-action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .settings-action-btn:disabled:hover {
+            border-color: var(--border);
+            background: var(--card);
+        }
+
+        /* Puter Status in Settings */
+        .puter-status-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+
+        .puter-status-bar .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .puter-status-bar.signed-in .dot { background: var(--success); }
+        .puter-status-bar .status-text { flex: 1; }
+
+        /* Buttons */
+        .btn {
+            border: none;
+            padding: 9px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+            font-family: inherit;
+        }
+
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-ghost { background: var(--primary-light); color: var(--primary); }
+        .btn-ghost:hover { filter: brightness(0.95); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: var(--primary-light); }
+        .btn-danger { background: var(--danger-light); color: var(--danger); }
+        .btn-danger:hover { filter: brightness(0.95); }
+        .btn-success { background: var(--success-light); color: var(--success); }
+        .btn-success:hover { filter: brightness(0.95); }
+        .btn-sm { padding: 7px 12px; font-size: 12px; }
+
+        /* Import Modal */
+        textarea.input {
+            min-height: 180px;
+            resize: none;
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+        }
+
+        .import-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: space-between;
+            margin-top: 16px;
+        }
+
+        .import-actions .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+        .import-progress { font-size: 12px; color: var(--text-muted); align-self: center; }
+
+        .detected-key {
+            background: var(--primary-light);
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            word-break: break-all;
+            margin-top: 6px;
+            border: 1px solid var(--border);
+        }
+
+        /* Config Editor */
+        .config-textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 14px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+            tab-size: 2;
+        }
+
+        .config-textarea:focus { border-color: var(--primary); }
+        .config-textarea.error { border-color: var(--danger); }
+
+        .config-error {
+            font-size: 12px;
+            color: var(--danger);
+            margin-top: 8px;
+            display: none;
+        }
+
+        .config-error.visible { display: block; }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--text);
+            color: var(--bg);
+            padding: 10px 20px;
+            border-radius: 40px;
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        #toast.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+        .empty-state h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+        .empty-state p { font-size: 13px; max-width: 280px; margin: 0 auto; }
+
+        /* Footer */
+        .app-footer {
+            text-align: center;
+            padding: 16px;
+            font-size: 11px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            background: var(--card);
+        }
+
+        .app-footer span { font-weight: 600; }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .controls-row { grid-template-columns: 1fr; }
+            .header { padding: 12px 16px; }
+            .container { padding: 12px; }
+            .modal-body { padding: 20px; }
+            .modal-footer { padding: 12px 20px; }
+            .modal-content { border-radius: 16px; }
+            .user-popup { right: 12px; width: calc(100vw - 24px); max-width: 300px; }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div id="toast">Copied</div>
+
+    <!-- Vault Lock Modal -->
+    <div class="modal-overlay active" id="vaultLockModal" onclick="handleOverlayClick(event, 'vaultLockModal')">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 400px;">
+            <div class="modal-body" style="padding: 24px;">
+                <h2 class="modal-title" id="vaultLockTitle">Vault Locked</h2>
+                <p class="modal-subtitle" id="vaultLockSubtitle">Enter your master password to unlock.</p>
+                <div style="margin-top: 16px;">
+                    <label style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); display:block; margin-bottom:6px;">Master Password</label>
+                    <input type="password" id="masterPassword" class="input" placeholder="Enter master password" required style="font-family: 'DM Mono', monospace;">
+                    <div id="vaultLockError" class="config-error" style="margin-top:8px;">Incorrect password. Please try again.</div>
+                </div>
+            </div>
+            <div class="modal-footer" style="display:flex; gap:8px; justify-content:flex-end;">
+                <button class="btn btn-outline" onclick="closeVaultLock()">Cancel</button>
+                <button class="btn btn-primary" id="vaultLockAction" onclick="unlockVault()">Unlock</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <h1>Api-Key Vault - JR</h1>
+        </div>
+        <div class="header-right">
+            <button class="header-btn" onclick="showModal('importModal')" title="Upload">⬆</button>
+            <button class="header-btn primary-btn" onclick="showAddModal()" title="Add Key">+</button>
+            <button class="header-btn settings-btn" onclick="showModal('settingsModal')" title="Settings">⚙</button>
+            <button class="user-btn" id="userBtn" onclick="toggleUserPopup()">
+                <div class="user-avatar" id="userAvatarLetter">U</div>
+                <span class="user-name-text" id="userBtnName">User</span>
+            </button>
+            <button class="header-btn" id="lockBtn" onclick="lockVault()" title="Lock Vault" style="display:none;">🔒</button>
+        </div>
+    </header>
+
+    <!-- User Popup -->
+    <div class="user-popup-overlay" id="userPopupOverlay" onclick="closeUserPopup()">
+        <div class="user-popup" onclick="event.stopPropagation()">
+            <div class="user-popup-header">
+                <div class="user-popup-avatar" id="popupAvatarLetter">U</div>
+                <div>
+                    <div class="user-popup-name" id="popupUserName">Username</div>
+                    <div class="user-popup-email" id="popupUserEmail">user@puter.com</div>
+                </div>
+            </div>
+            <div class="usage-section">
+                <div class="usage-title">Monthly AI Usage</div>
+                <div class="usage-item">
+                    <span class="label">Requests</span>
+                    <span class="value" id="usageRequests">--</span>
+                </div>
+                <div class="usage-item">
+                    <span class="label">Tokens Used</span>
+                    <span class="value" id="usageTokens">--</span>
+                </div>
+                <div class="usage-bar-bg">
+                    <div class="usage-bar-fill" id="usageBarFill" style="width: 0%"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-top:6px;">
+                    <span style="font-size:11px; color:var(--text-muted);">Usage</span>
+                    <span style="font-size:11px; color:var(--text-muted);" id="usagePercent">--</span>
+                </div>
+            </div>
+            <button class="btn-signout" onclick="handlePuterSignOut()">Sign Out</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="controls-row">
+            <input type="text" id="searchInput" class="input" placeholder="Search keys..." oninput="render()">
+            <select id="sortSelect" class="select" onchange="render()">
+                <option value="newest">Newest</option>
+                <option value="usage">Most Used</option>
+                <option value="name">A - Z</option>
+            </select>
+        </div>
+        <div id="keysContainer"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <span>Api-Key Vault - JR</span> &middot; v1.0.0 &middot; Powered by Puter
+    </footer>
+
+    <!-- Entry Modal (Add/Edit) -->
+    <div class="modal-overlay" id="entryModal" onclick="handleOverlayClick(event, 'entryModal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-body">
+                <h2 class="modal-title" id="entryTitle">Add Key</h2>
+                <p class="modal-subtitle">Store a new API key securely in your vault.</p>
+                <form id="entryForm" style="margin-top: 16px;">
+                    <input type="hidden" id="editId">
+                    <div style="margin-bottom: 14px">
+                        <label style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); display:block; margin-bottom:6px;">Name</label>
+                        <input type="text" id="fName" class="input" placeholder="e.g. Production Key" required>
+                    </div>
+                    <div style="margin-bottom: 14px">
+                        <label style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); display:block; margin-bottom:6px;">Provider</label>
+                        <input type="text" id="fProvider" class="input" placeholder="e.g. OpenAI, Stripe" required>
+                    </div>
+                    <div style="margin-bottom: 14px">
+                        <label style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); display:block; margin-bottom:6px;">Account <span style="text-transform:none; font-weight:400">(optional)</span></label>
+                        <input type="text" id="fAccount" class="input" placeholder="e.g. personal, work">
+                    </div>
+                    <div style="margin-bottom: 20px">
+                        <label style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); display:block; margin-bottom:6px;">API Key</label>
+                        <input type="text" id="fKey" class="input" placeholder="sk-..." required style="font-family: 'DM Mono', monospace;">
+                    </div>
+                    <div style="display:flex; gap:8px; justify-content:flex-end;">
+                        <button type="button" class="btn btn-outline" onclick="closeModals()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Key</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal-overlay" id="importModal" onclick="handleOverlayClick(event, 'importModal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-body">
+                <h2 class="modal-title">Upload Keys</h2>
+                <p class="modal-subtitle">Import keys from text or a file.</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px;">
+                    <button class="btn btn-outline" onclick="showModal('pasteModal')" style="height: 80px; flex-direction: column; gap: 8px;">
+                        <span style="font-size: 24px;">📋</span>
+                        <span>Paste Text</span>
+                    </button>
+                    <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()" style="height: 80px; flex-direction: column; gap: 8px;">
+                        <span style="font-size: 24px;">📁</span>
+                        <span>File Upload</span>
+                    </button>
+                </div>
+                <input type="file" id="fileInput" hidden accept=".json,.txt,.env,.csv" onchange="handleFileUpload(event)">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModals()" style="width:100%;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paste Modal -->
+    <div class="modal-overlay" id="pasteModal" onclick="handleOverlayClick(event, 'pasteModal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-body">
+                <h2 class="modal-title">Paste Raw Text</h2>
+                <p class="modal-subtitle">Paste any text containing API keys — we'll detect them automatically.</p>
+                <textarea id="pasteArea" class="input" placeholder="Paste your keys here...&#10;&#10;Example:&#10;OPENAI_API_KEY=sk-abc123&#10;STRIPE_KEY=sk_live_xyz789" style="margin-top:16px;"></textarea>
+            </div>
+            <div class="modal-footer" style="display:flex; gap:8px; justify-content:flex-end;">
+                <button class="btn btn-outline" onclick="showModal('importModal')">Back</button>
+                <button class="btn btn-primary" onclick="handlePasteParse()">Find Keys</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Import Modal -->
+    <div class="modal-overlay" id="confirmImportModal" onclick="handleOverlayClick(event, 'confirmImportModal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-body">
+                <h2 class="modal-title">Confirm Import</h2>
+                <p class="modal-subtitle">Review each detected key before adding to your vault.</p>
+                <div style="margin-top:20px;">
+                    <div style="margin-bottom: 14px">
+                        <label style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); display:block; margin-bottom:6px;">Provider</label>
+                        <input type="text" id="cProvider" class="input">
+                    </div>
+                    <div style="margin-bottom: 14px">
+                        <label style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); display:block; margin-bottom:6px;">Account</label>
+                        <input type="text" id="cAccount" class="input" placeholder="optional">
+                    </div>
+                    <div style="margin-bottom: 14px">
+                        <label style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); display:block; margin-bottom:6px;">Detected Key</label>
+                        <div id="cKeyDisplay" class="detected-key"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="import-actions" style="margin-top:0;">
+                    <span class="import-progress" id="importProgress">1 of 1</span>
+                    <div class="btn-group">
+                        <button class="btn btn-outline btn-sm" onclick="skipImport()">Skip</button>
+                        <button class="btn btn-danger btn-sm" onclick="skipAllImport()">Skip All</button>
+                        <button class="btn btn-success btn-sm" onclick="confirmAllImport()">Confirm All</button>
+                        <button class="btn btn-primary btn-sm" onclick="approveImport()">Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal" onclick="handleOverlayClick(event, 'settingsModal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-body">
+                <h2 class="modal-title">Settings</h2>
+                <p class="modal-subtitle">Manage your vault preferences and data.</p>
+
+                <div class="settings-scroll">
+                    <!-- Appearance -->
+                    <div class="modal-section">
+                        <div class="modal-section-title">Appearance</div>
+                        <div class="setting-row">
+                            <div>
+                                <div class="setting-label">Theme</div>
+                                <div class="setting-desc">Choose your preferred color scheme</div>
+                            </div>
+                            <div class="toggle-group">
+                                <button class="toggle-option" data-theme="light" onclick="setTheme('light')">Light</button>
+                                <button class="toggle-option active" data-theme="dark" onclick="setTheme('dark')">Dark</button>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <div>
+                                <div class="setting-label">Compact Mode</div>
+                                <div class="setting-desc">Reduce spacing and font sizes</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="compactToggle" onchange="toggleCompact()">
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Cloud Sync -->
+                    <div class="modal-section">
+                        <div class="modal-section-title">Cloud Sync</div>
+                        <div class="puter-status-bar" id="puterStatus">
+                            <span class="dot"></span>
+                            <span class="status-text">Checking...</span>
+                        </div>
+                        <button class="settings-action-btn" id="puterSignInBtn" onclick="handlePuterSignIn()">
+                            <span class="icon">☁️</span>
+                            <span class="label">Sign In with Puter</span>
+                            <span class="arrow-right">→</span>
+                        </button>
+                        <button class="settings-action-btn success" id="puterSaveBtn" onclick="saveToPuter()" style="display:none;">
+                            <span class="icon">💾</span>
+                            <span class="label">Save Keys to Puter</span>
+                            <span class="arrow-right">→</span>
+                        </button>
+                        <button class="settings-action-btn" id="puterLoadBtn" onclick="loadFromPuter()" style="display:none;">
+                            <span class="icon">📥</span>
+                            <span class="label">Load Keys from Puter</span>
+                            <span class="arrow-right">→</span>
+                        </button>
+                    </div>
+
+                    <!-- Data Management -->
+                    <div class="modal-section">
+                        <div class="modal-section-title">Data Management</div>
+                        <button class="settings-action-btn" onclick="showConfigEditor()">
+                            <span class="icon">📝</span>
+                            <span class="label">Edit App Config File</span>
+                            <span class="arrow-right">→</span>
+                        </button>
+                        <button class="settings-action-btn" onclick="exportKeys()">
+                            <span class="icon">📤</span>
+                            <span class="label">Export Keys</span>
+                            <span class="arrow-right">→</span>
+                        </button>
+                        <button class="settings-action-btn danger" onclick="showResetConfirm()">
+                            <span class="icon">🗑️</span>
+                            <span class="label">Reset All Data</span>
+                            <span class="arrow-right">→</span>
+                        </button>
+                        <button class="settings-action-btn" onclick="showMasterPasswordSetup()">
+                            <span class="icon">🔒</span>
+                            <span class="label" id="masterPasswordSettingLabel">Set Master Password</span>
+                            <span class="arrow-right">→</span>
+                        </button>
+                    </div>
+
+                    <!-- About -->
+                    <div class="modal-section">
+                        <div class="modal-section-title">About</div>
+                        <div style="padding: 8px 0;">
+                            <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">Api-Key Vault - JR</div>
+                            <div style="font-size: 12px; color: var(--text-muted);">Version 1.0.0</div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">A secure API key management tool with cloud sync via Puter.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModals()" style="width:100%;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Config Editor Modal -->
+    <div class="modal-overlay" id="configModal" onclick="handleOverlayClick(event, 'configModal')">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 560px;">
+            <div class="modal-body">
+                <h2 class="modal-title">Edit App Config File</h2>
+                <p class="modal-subtitle">Manually edit your stored keys. Changes are applied when you save.</p>
+                <textarea id="configEditor" class="config-textarea" spellcheck="false"></textarea>
+                <div id="configError" class="config-error">Invalid JSON format. Please fix errors before saving.</div>
+            </div>
+            <div class="modal-footer" style="display:flex; gap:8px; justify-content:flex-end;">
+                <button class="btn btn-outline" onclick="closeModals()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveConfig()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal-overlay" id="resetModal" onclick="handleOverlayClick(event, 'resetModal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-body">
+                <h2 class="modal-title" style="color: var(--danger);">Reset All Data</h2>
+                <p class="modal-subtitle">This will permanently delete all stored keys from your local vault. This action cannot be undone.</p>
+                <div style="background: var(--danger-light); border: 1px solid var(--danger); border-radius: var(--radius-sm); padding: 14px; margin-top: 16px;">
+                    <p style="font-size: 13px; color: var(--danger); font-weight: 600;">⚠️ All keys will be permanently deleted from this device.</p>
+                </div>
+            </div>
+            <div class="modal-footer" style="display:flex; gap:8px; justify-content:flex-end;">
+                <button class="btn btn-outline" onclick="closeModals()">Cancel</button>
+                <button class="btn btn-danger" onclick="resetAll()">Reset Everything</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =====================
+        // State
+        // =====================
+        let keys = [];
+        let tempBatch = [];
+        let importIdx = 0;
+        let expanded = new Set();
+        let puterUser = null;
+        let usageRefreshInterval = null;
+        let vaultUnlocked = false;
+        let masterKey = null;
+        let inactivityTimeout = null;
+        const INACTIVITY_MS = 5 * 60 * 1000;
+        const STORAGE_KEY = 'vault_v7';
+        const PLAINTEXT_MIGRATION_KEY = 'vault_v7_migrated';
+
+        async function getMasterKey(password) {
+            const enc = new TextEncoder();
+            const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+            return crypto.subtle.deriveKey(
+                { name: 'PBKDF2', salt: enc.encode('api-manager-vault'), iterations: 100000, hash: 'SHA-256' },
+                keyMaterial,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['encrypt', 'decrypt']
+            );
+        }
+
+        async function encryptData(key, data) {
+            const enc = new TextEncoder();
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(JSON.stringify(data)));
+            return { iv: Array.from(iv), data: Array.from(new Uint8Array(ciphertext)) };
+        }
+
+        async function decryptData(key, payload) {
+            const dec = new TextDecoder();
+            const iv = new Uint8Array(payload.iv);
+            const ciphertext = new Uint8Array(payload.data);
+            const plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+            return JSON.parse(dec.decode(plaintext));
+        }
+
+        async function requireUnlock() {
+            if (!vaultUnlocked || !masterKey) {
+                showVaultLock();
+                throw new Error('locked');
+            }
+        }
+
+        function resetInactivityTimer() {
+            if (inactivityTimeout) clearTimeout(inactivityTimeout);
+            inactivityTimeout = setTimeout(() => {
+                if (vaultUnlocked) lockVault(true);
+            }, INACTIVITY_MS);
+        }
+
+        function showVaultLock() {
+            vaultUnlocked = false;
+            masterKey = null;
+            document.getElementById('vaultLockTitle').textContent = 'Vault Locked';
+            document.getElementById('vaultLockSubtitle').textContent = 'Enter your master password to unlock.';
+            document.getElementById('masterPassword').value = '';
+            document.getElementById('vaultLockError').classList.remove('visible');
+            document.getElementById('vaultLockAction').textContent = 'Unlock';
+            document.getElementById('vaultLockAction').onclick = unlockVault;
+            document.getElementById('lockBtn').style.display = 'none';
+            showModal('vaultLockModal');
+        }
+
+        function showVaultSetup() {
+            vaultUnlocked = false;
+            masterKey = null;
+            document.getElementById('vaultLockTitle').textContent = 'Create Master Password';
+            document.getElementById('vaultLockSubtitle').textContent = 'Set a password to encrypt your local vault.';
+            document.getElementById('masterPassword').value = '';
+            document.getElementById('vaultLockError').classList.remove('visible');
+            document.getElementById('vaultLockAction').textContent = 'Save Password';
+            document.getElementById('vaultLockAction').onclick = setupVault;
+            document.getElementById('lockBtn').style.display = 'none';
+            showModal('vaultLockModal');
+        }
+
+        async function setupVault() {
+            const password = document.getElementById('masterPassword').value;
+            if (!password || password.length < 4) {
+                document.getElementById('vaultLockError').textContent = 'Password must be at least 4 characters.';
+                document.getElementById('vaultLockError').classList.add('visible');
+                return;
+            }
+
+            masterKey = await getMasterKey(password);
+            keys = [];
+            vaultUnlocked = true;
+            localStorage.setItem('vault_v7_configured', 'true');
+            document.getElementById('masterPasswordSettingLabel').textContent = 'Change Master Password';
+            closeModals();
+            save();
+            render();
+            showToast('Vault encrypted');
+            resetInactivityTimer();
+        }
+
+        async function unlockVault() {
+            const password = document.getElementById('masterPassword').value;
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (!stored) {
+                showVaultSetup();
+                return;
+            }
+
+            try {
+                const key = await getMasterKey(password);
+                const payload = JSON.parse(stored);
+                const decrypted = await decryptData(key, payload);
+                masterKey = key;
+                keys = Array.isArray(decrypted) ? decrypted : [];
+                vaultUnlocked = true;
+                document.getElementById('vaultLockError').classList.remove('visible');
+                document.getElementById('masterPassword').value = '';
+                document.getElementById('lockBtn').style.display = 'inline-flex';
+                closeModals();
+                save();
+                render();
+                showToast('Vault unlocked');
+                resetInactivityTimer();
+            } catch (e) {
+                document.getElementById('vaultLockError').textContent = 'Incorrect password. Please try again.';
+                document.getElementById('vaultLockError').classList.add('visible');
+            }
+        }
+
+        function lockVault(isInactive = false) {
+            vaultUnlocked = false;
+            masterKey = null;
+            keys = [];
+            if (inactivityTimeout) clearTimeout(inactivityTimeout);
+            document.getElementById('lockBtn').style.display = 'none';
+            if (!isInactive) showVaultLock();
+            render();
+        }
+
+        async function migratePlaintextVault() {
+            if (localStorage.getItem(PLAINTEXT_MIGRATION_KEY) === 'true') return;
+            const raw = localStorage.getItem('vault_v7');
+            if (!raw) return;
+            try {
+                const parsed = JSON.parse(raw);
+                if (!Array.isArray(parsed)) return;
+                if (!masterKey) {
+                    const password = prompt('Existing vault found. Enter your master password to migrate it:');
+                    if (!password) return;
+                    masterKey = await getMasterKey(password);
+                }
+                keys = parsed;
+                await save();
+                localStorage.removeItem('vault_v7');
+                localStorage.setItem(PLAINTEXT_MIGRATION_KEY, 'true');
+                showToast('Existing vault migrated');
+            } catch (e) {
+                console.log('Plaintext migration failed:', e);
+            }
+        }
+
+        async function changeMasterPassword() {
+            const current = prompt('Enter current master password:');
+            if (!current) return;
+            const stored = localStorage.getItem(STORAGE_KEY);
+            let currentKey = masterKey;
+            if (!currentKey && stored) {
+                try {
+                    currentKey = await getMasterKey(current);
+                    const payload = JSON.parse(stored);
+                    await decryptData(currentKey, payload);
+                } catch (e) {
+                    showToast('Incorrect current password');
+                    return;
+                }
+            }
+            const next = prompt('Enter new master password:');
+            if (!next || next.length < 4) {
+                showToast('New password must be at least 4 characters');
+                return;
+            }
+            masterKey = await getMasterKey(next);
+            await save();
+            showToast('Master password updated');
+        }
+
+        function showMasterPasswordSetup() {
+            changeMasterPassword();
+        }
+
+        // =====================
+        // Init
+        // =====================
+        async function init() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                showVaultLock();
+            } else {
+                showVaultSetup();
+            }
+
+            // Default dark mode
+            const theme = localStorage.getItem('vault_theme') || 'dark';
+            setTheme(theme, false);
+
+            // Compact mode
+            const compact = localStorage.getItem('vault_compact') === 'true';
+            if (compact) {
+                document.body.classList.add('compact');
+                document.getElementById('compactToggle').checked = true;
+            }
+
+            // Check auth on launch
+            checkPuterAuth();
+        }
+
+        async function save() {
+            if (!masterKey) return;
+            const payload = await encryptData(masterKey, keys);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        }
+
+        // =====================
+        // Theme
+        // =====================
+        function setTheme(theme, save_pref = true) {
+            document.body.setAttribute('data-theme', theme);
+            document.querySelectorAll('.toggle-option[data-theme]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === theme);
+            });
+            if (save_pref) {
+                localStorage.setItem('vault_theme', theme);
+            }
+        }
+
+        // =====================
+        // Compact Mode
+        // =====================
+        function toggleCompact() {
+            const isCompact = document.getElementById('compactToggle').checked;
+            document.body.classList.toggle('compact', isCompact);
+            localStorage.setItem('vault_compact', isCompact);
+        }
+
+        // =====================
+        // Render Keys
+        // =====================
+        function render() {
+            const container = document.getElementById('keysContainer');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const sort = document.getElementById('sortSelect').value;
+            container.innerHTML = '';
+
+            let filtered = keys.filter(k =>
+                k.name.toLowerCase().includes(search) ||
+                k.provider.toLowerCase().includes(search) ||
+                (k.account && k.account.toLowerCase().includes(search))
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">🔑</div>
+                        <h3>${keys.length === 0 ? 'No keys yet' : 'No matches found'}</h3>
+                        <p>${keys.length === 0 ? 'Add your first API key to get started.' : 'Try a different search term.'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group by provider
+            const groupsMap = filtered.reduce((acc, k) => {
+                if (!acc[k.provider]) acc[k.provider] = [];
+                acc[k.provider].push(k);
+                return acc;
+            }, {});
+
+            const sortedGroupNames = Object.keys(groupsMap).sort((a, b) => {
+                if (sort === 'name') return a.localeCompare(b);
+                const groupA = groupsMap[a];
+                const groupB = groupsMap[b];
+                if (sort === 'newest') {
+                    return Math.max(...groupB.map(k => k.ts)) - Math.max(...groupA.map(k => k.ts));
+                }
+                if (sort === 'usage') {
+                    const useA = groupA.reduce((s, k) => s + (k.used || 0), 0);
+                    const useB = groupB.reduce((s, k) => s + (k.used || 0), 0);
+                    return useB - useA;
+                }
+                return 0;
+            });
+
+            sortedGroupNames.forEach((provider, gi) => {
+                const groupKeys = groupsMap[provider].sort((a, b) => {
+                    if (sort === 'newest') return b.ts - a.ts;
+                    if (sort === 'usage') return (b.used || 0) - (a.used || 0);
+                    return a.name.localeCompare(b.name);
+                });
+
+                const totalUsage = groupKeys.reduce((sum, k) => sum + (k.used || 0), 0);
+                const isExpanded = expanded.has(provider);
+
+                let usageBadgeClass = '';
+                if (totalUsage >= 50) usageBadgeClass = 'very-high';
+                else if (totalUsage >= 20) usageBadgeClass = 'high';
+
+                const groupDiv = document.createElement('div');
+                groupDiv.className = `provider-group ${isExpanded ? 'expanded' : ''}`;
+
+                groupDiv.innerHTML = `
+                    <div class="group-header" onclick="toggleGroup('${provider}')">
+                        <div class="group-header-left">
+                            <span class="arrow">▶</span>
+                            <span>${escapeHtml(provider)}</span>
+                            <span class="count">${groupKeys.length}</span>
+                        </div>
+                        <div class="group-header-right">
+                            <span class="group-usage-badge ${usageBadgeClass}">
+                                <span class="usage-icon">📊</span>
+                                ${totalUsage} uses
+                            </span>
+                        </div>
+                    </div>
+                    <div class="group-content">
+                        ${groupKeys.map((k, i) => {
+                            const uses = k.used || 0;
+                            return `
+                            <div class="key-card" style="animation-delay: ${i * 0.05}s">
+                                <div class="card-top">
+                                    <div>
+                                        <div class="card-name">${escapeHtml(k.name)}</div>
+                                        ${k.account ? `<span class="acc-tag">${escapeHtml(k.account)}</span>` : ''}
+                                    </div>
+                                    <div class="card-meta">
+                                        <span class="uses-badge">
+                                            <span class="uses-icon">📊</span>
+                                            ${uses} use${uses !== 1 ? 's' : ''}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="key-row">
+                                    <div class="key-val" id="key-${k.id}">••••••••••••••••</div>
+                                    <button class="btn-eye" onclick="toggleMask('${k.id}')" id="eye-${k.id}" title="Toggle visibility">👁️</button>
+                                </div>
+                                <div class="card-actions">
+                                    <button class="btn-card-action" onclick="copyKey('${k.id}')">
+                                        <span class="action-icon">📋</span> Copy
+                                    </button>
+                                    <button class="btn-card-action" onclick="editKey('${k.id}')">
+                                        <span class="action-icon">✏️</span> Edit
+                                    </button>
+                                    <button class="btn-card-action danger" onclick="deleteKey('${k.id}')">
+                                        <span class="action-icon">🗑️</span> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        `}).join('')}
+                    </div>
+                `;
+                container.appendChild(groupDiv);
+            });
+        }
+
+        function toggleGroup(provider) {
+            if (expanded.has(provider)) {
+                expanded.delete(provider);
+            } else {
+                expanded.add(provider);
+            }
+            render();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // =====================
+        // Key Actions
+        // =====================
+        function copyKey(id) {
+            const key = keys.find(k => k.id === id);
+            if (!key) return;
+            navigator.clipboard.writeText(key.key).then(() => {
+                key.used = (key.used || 0) + 1;
+                key.ts = Date.now();
+                save();
+                render();
+                showToast('Copied to clipboard');
+            });
+        }
+
+        function toggleMask(id) {
+            const key = keys.find(k => k.id === id);
+            const el = document.getElementById(`key-${id}`);
+            const eye = document.getElementById(`eye-${id}`);
+            if (!key || !el) return;
+
+            if (el.dataset.visible === 'true') {
+                el.textContent = '••••••••••••••••';
+                el.dataset.visible = 'false';
+                eye.textContent = '👁️';
+            } else {
+                el.textContent = key.key;
+                el.dataset.visible = 'true';
+                eye.textContent = '🙈';
+            }
+        }
+
+        function deleteKey(id) {
+            if (!confirm('Delete this key?')) return;
+            keys = keys.filter(k => k.id !== id);
+            save();
+            render();
+            showToast('Key deleted');
+        }
+
+        function editKey(id) {
+            const key = keys.find(k => k.id === id);
+            if (!key) return;
+            document.getElementById('editId').value = id;
+            document.getElementById('fName').value = key.name;
+            document.getElementById('fProvider').value = key.provider;
+            document.getElementById('fAccount').value = key.account || '';
+            document.getElementById('fKey').value = key.key;
+            document.getElementById('entryTitle').textContent = 'Edit Key';
+            showModal('entryModal');
+        }
+
+        function showAddModal() {
+            document.getElementById('editId').value = '';
+            document.getElementById('entryForm').reset();
+            document.getElementById('entryTitle').textContent = 'Add Key';
+            showModal('entryModal');
+        }
+
+        // =====================
+        // Modal Management
+        // =====================
+        function showModal(id) {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModals() {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+        }
+
+        function handleOverlayClick(event, modalId) {
+            if (event.target.id === modalId) {
+                closeModals();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModals();
+                closeUserPopup();
+            }
+        });
+
+        // =====================
+        // Config Editor
+        // =====================
+        function showConfigEditor() {
+            const editor = document.getElementById('configEditor');
+            const errorEl = document.getElementById('configError');
+            editor.value = JSON.stringify(keys, null, 2);
+            editor.classList.remove('error');
+            errorEl.classList.remove('visible');
+            showModal('configModal');
+        }
+
+        function saveConfig() {
+            const editor = document.getElementById('configEditor');
+            const errorEl = document.getElementById('configError');
+
+            try {
+                const parsed = JSON.parse(editor.value);
+
+                if (!Array.isArray(parsed)) {
+                    throw new Error('Config must be an array');
+                }
+
+                // Validate structure
+                for (const item of parsed) {
+                    if (!item.id || !item.name || !item.provider || !item.key) {
+                        throw new Error('Each key must have id, name, provider, and key fields');
+                    }
+                    // Ensure required fields
+                    item.ts = item.ts || Date.now();
+                    item.used = item.used || 0;
+                    item.account = item.account || '';
+                }
+
+                keys = parsed;
+                save();
+                render();
+                closeModals();
+                showToast('Config saved successfully');
+            } catch (e) {
+                editor.classList.add('error');
+                errorEl.textContent = e.message || 'Invalid JSON format. Please fix errors before saving.';
+                errorEl.classList.add('visible');
+            }
+        }
+
+        // =====================
+        // User Popup
+        // =====================
+        function toggleUserPopup() {
+            const overlay = document.getElementById('userPopupOverlay');
+            if (overlay.classList.contains('active')) {
+                closeUserPopup();
+            } else {
+                overlay.classList.add('active');
+                loadPuterUsage();
+            }
+        }
+
+        function closeUserPopup() {
+            document.getElementById('userPopupOverlay').classList.remove('active');
+        }
+
+        // =====================
+        // Puter Integration
+        // =====================
+        async function checkPuterAuth() {
+            try {
+                const isSignedIn = puter.auth.isSignedIn();
+                if (isSignedIn) {
+                    puterUser = await puter.auth.getUser();
+                    updatePuterUI(true);
+                    startUsageRefresh();
+                } else {
+                    updatePuterUI(false);
+                }
+            } catch (e) {
+                console.log('Puter check failed:', e);
+                updatePuterUI(false);
+            }
+        }
+
+        function startUsageRefresh() {
+            // Initial fetch
+            loadPuterUsage();
+            // Refresh every 30 seconds
+            if (usageRefreshInterval) clearInterval(usageRefreshInterval);
+            usageRefreshInterval = setInterval(() => {
+                if (puterUser && document.getElementById('userPopupOverlay').classList.contains('active')) {
+                    loadPuterUsage();
+                }
+            }, 30000);
+        }
+
+        async function loadPuterUsage() {
+            const reqEl = document.getElementById('usageRequests');
+            const tokEl = document.getElementById('usageTokens');
+            const barEl = document.getElementById('usageBarFill');
+            const pctEl = document.getElementById('usagePercent');
+
+            try {
+                const usage = await puter.auth.getMonthlyUsage();
+                if (usage) {
+                    const requests = usage.requests?.total || 0;
+                    const tokens = usage.tokens?.total || 0;
+                    const limit = usage.requests?.limit || 1000;
+                    const percent = Math.min(100, Math.round((requests / limit) * 100));
+
+                    reqEl.textContent = requests.toLocaleString();
+                    tokEl.textContent = tokens.toLocaleString();
+                    barEl.style.width = percent + '%';
+                    pctEl.textContent = percent + '%';
+
+                    if (percent >= 90) {
+                        barEl.style.background = 'var(--danger)';
+                    } else if (percent >= 70) {
+                        barEl.style.background = 'var(--warning)';
+                    } else {
+                        barEl.style.background = 'var(--primary)';
+                    }
+                } else {
+                    reqEl.textContent = '0';
+                    tokEl.textContent = '0';
+                    barEl.style.width = '0%';
+                    pctEl.textContent = '0%';
+                }
+            } catch (e) {
+                console.log('Usage fetch failed:', e);
+                reqEl.textContent = '--';
+                tokEl.textContent = '--';
+                pctEl.textContent = '--';
+            }
+        }
+
+        function updatePuterUI(signedIn) {
+            const statusEl = document.getElementById('puterStatus');
+            const signInBtn = document.getElementById('puterSignInBtn');
+            const saveBtn = document.getElementById('puterSaveBtn');
+            const loadBtn = document.getElementById('puterLoadBtn');
+            const userBtn = document.getElementById('userBtn');
+            const userBtnName = document.getElementById('userBtnName');
+            const userAvatarLetter = document.getElementById('userAvatarLetter');
+            const popupAvatarLetter = document.getElementById('popupAvatarLetter');
+            const popupUserName = document.getElementById('popupUserName');
+            const popupUserEmail = document.getElementById('popupUserEmail');
+
+            if (signedIn && puterUser) {
+                const username = puterUser.username || 'User';
+                const email = puterUser.email || '';
+                const initial = username.charAt(0).toUpperCase();
+
+                statusEl.classList.add('signed-in');
+                statusEl.innerHTML = `
+                    <span class="dot"></span>
+                    <span class="status-text">Signed in as <strong>${escapeHtml(username)}</strong></span>
+                `;
+                signInBtn.style.display = 'none';
+                saveBtn.style.display = 'flex';
+                loadBtn.style.display = 'flex';
+
+                userBtn.classList.add('visible');
+                userBtnName.textContent = username;
+                userAvatarLetter.textContent = initial;
+                popupAvatarLetter.textContent = initial;
+                popupUserName.textContent = username;
+                popupUserEmail.textContent = email || 'Puter user';
+            } else {
+                statusEl.classList.remove('signed-in');
+                statusEl.innerHTML = `
+                    <span class="dot"></span>
+                    <span class="status-text">Not signed in</span>
+                `;
+                signInBtn.style.display = 'flex';
+                signInBtn.innerHTML = `
+                    <span class="icon">☁️</span>
+                    <span class="label">Sign In with Puter</span>
+                    <span class="arrow-right">→</span>
+                `;
+                signInBtn.onclick = handlePuterSignIn;
+                saveBtn.style.display = 'none';
+                loadBtn.style.display = 'none';
+                userBtn.classList.remove('visible');
+                closeUserPopup();
+            }
+        }
+
+        async function handlePuterSignIn() {
+            try {
+                await puter.auth.signIn();
+                puterUser = await puter.auth.getUser();
+                updatePuterUI(true);
+                startUsageRefresh();
+                closeModals();
+                showToast('Signed in successfully');
+            } catch (e) {
+                console.log('Sign in failed:', e);
+                showToast('Sign in cancelled or failed');
+            }
+        }
+
+        async function handlePuterSignOut() {
+            try {
+                await puter.auth.signOut();
+                puterUser = null;
+                if (usageRefreshInterval) {
+                    clearInterval(usageRefreshInterval);
+                    usageRefreshInterval = null;
+                }
+                updatePuterUI(false);
+                closeUserPopup();
+                showToast('Signed out');
+            } catch (e) {
+                console.log('Sign out failed:', e);
+            }
+        }
+
+        async function saveToPuter() {
+            if (!puterUser) {
+                showToast('Please sign in first');
+                return;
+            }
+            try {
+                const data = JSON.stringify(keys);
+                await puter.kv.set('jr_vault_keys', data);
+                showToast(`Saved ${keys.length} key(s) to Puter`);
+            } catch (e) {
+                console.log('Save failed:', e);
+                showToast('Failed to save to Puter');
+            }
+        }
+
+        async function loadFromPuter() {
+            if (!puterUser) {
+                showToast('Please sign in first');
+                return;
+            }
+            try {
+                const data = await puter.kv.get('jr_vault_keys');
+                if (data) {
+                    const loadedKeys = JSON.parse(data);
+                    if (!Array.isArray(loadedKeys)) {
+                        showToast('Invalid data format in Puter');
+                        return;
+                    }
+
+                    const existingIds = new Set(keys.map(k => k.id));
+                    let added = 0;
+                    let updated = 0;
+
+                    loadedKeys.forEach(k => {
+                        if (k.id && k.key && k.name && k.provider) {
+                            if (existingIds.has(k.id)) {
+                                // Update existing
+                                const idx = keys.findIndex(ex => ex.id === k.id);
+                                if (idx >= 0) {
+                                    keys[idx] = { ...keys[idx], ...k };
+                                    updated++;
+                                }
+                            } else {
+                                keys.push(k);
+                                added++;
+                            }
+                        }
+                    });
+
+                    save();
+                    render();
+                    closeModals();
+                    const msg = [];
+                    if (added > 0) msg.push(`${added} new`);
+                    if (updated > 0) msg.push(`${updated} updated`);
+                    showToast(`Loaded: ${msg.join(', ') || 'no changes'}`);
+                } else {
+                    showToast('No keys found in Puter');
+                }
+            } catch (e) {
+                console.log('Load failed:', e);
+                showToast('Failed to load from Puter');
+            }
+        }
+
+        // =====================
+        // Form Submit
+        // =====================
+        document.getElementById('entryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editId').value;
+            const data = {
+                id: editId || generateId(),
+                name: document.getElementById('fName').value.trim(),
+                provider: document.getElementById('fProvider').value.trim(),
+                account: document.getElementById('fAccount').value.trim(),
+                key: document.getElementById('fKey').value.trim(),
+                ts: Date.now(),
+                used: 0
+            };
+
+            if (editId) {
+                const idx = keys.findIndex(k => k.id === editId);
+                if (idx >= 0) {
+                    data.used = keys[idx].used || 0;
+                    keys[idx] = data;
+                }
+                showToast('Key updated');
+            } else {
+                keys.push(data);
+                showToast('Key added');
+            }
+
+            save();
+            render();
+            closeModals();
+        });
+
+        // =====================
+        // Import Logic
+        // =====================
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('pasteArea').value = e.target.result;
+                showModal('pasteModal');
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function handlePasteParse() {
+            const text = document.getElementById('pasteArea').value;
+            if (!text.trim()) {
+                showToast('Please paste some text first');
+                return;
+            }
+
+            const detected = detectKeys(text);
+            if (detected.length === 0) {
+                showToast('No keys detected');
+                return;
+            }
+
+            tempBatch = detected;
+            importIdx = 0;
+            closeModals();
+            showConfirmImport();
+        }
+
+        function detectKeys(text) {
+            const keys = [];
+            const patterns = [
+                /(?:api[_-]?key|apikey|key)\s*[:=]\s*['"]?([a-zA-Z0-9_\-]{20,})['"]?/gi,
+                /(?:sk|pk|ak|rk)[-_][a-zA-Z0-9]{20,}/g,
+                /(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36,}/g,
+                /(?:xox[bposa]-[a-zA-Z0-9\-]+)/g,
+                /(?:AIza[a-zA-Z0-9\-_]{35})/g,
+                /(?:ya29\.[a-zA-Z0-9\-_]+)/g,
+            ];
+
+            const seen = new Set();
+            patterns.forEach(pattern => {
+                let match;
+                while ((match = pattern.exec(text)) !== null) {
+                    const key = match[1] || match[0];
+                    if (!seen.has(key) && key.length >= 20) {
+                        seen.add(key);
+                        keys.push({
+                            key: key,
+                            provider: guessProvider(key),
+                            name: '',
+                            account: ''
+                        });
+                    }
+                }
+            });
+
+            return keys;
+        }
+
+        function guessProvider(key) {
+            if (key.startsWith('sk-')) return 'OpenAI';
+            if (key.startsWith('ghp_') || key.startsWith('gho_')) return 'GitHub';
+            if (key.startsWith('xox')) return 'Slack';
+            if (key.startsWith('AIza')) return 'Google';
+            if (key.startsWith('ya29')) return 'Google';
+            if (key.startsWith('rk_')) return 'Replicate';
+            return 'Unknown';
+        }
+
+        function showConfirmImport() {
+            if (importIdx >= tempBatch.length) {
+                closeModals();
+                save();
+                render();
+                showToast(`${tempBatch.length} key(s) imported`);
+                tempBatch = [];
+                return;
+            }
+
+            const item = tempBatch[importIdx];
+            document.getElementById('cProvider').value = item.provider;
+            document.getElementById('cAccount').value = item.account;
+            document.getElementById('cKeyDisplay').textContent = item.key;
+            document.getElementById('importProgress').textContent = `${importIdx + 1} of ${tempBatch.length}`;
+            showModal('confirmImportModal');
+        }
+
+        function approveImport() {
+            const item = tempBatch[importIdx];
+            keys.push({
+                id: generateId(),
+                name: document.getElementById('cProvider').value + ' Key',
+                provider: document.getElementById('cProvider').value.trim() || 'Unknown',
+                account: document.getElementById('cAccount').value.trim(),
+                key: item.key,
+                ts: Date.now(),
+                used: 0
+            });
+            importIdx++;
+            showConfirmImport();
+        }
+
+        function skipImport() {
+            importIdx++;
+            showConfirmImport();
+        }
+
+        function skipAllImport() {
+            closeModals();
+            tempBatch = [];
+            importIdx = 0;
+            showToast('Import cancelled');
+        }
+
+        function confirmAllImport() {
+            for (let i = importIdx; i < tempBatch.length; i++) {
+                const item = tempBatch[i];
+                keys.push({
+                    id: generateId(),
+                    name: item.provider + ' Key',
+                    provider: item.provider || 'Unknown',
+                    account: item.account || '',
+                    key: item.key,
+                    ts: Date.now(),
+                    used: 0
+                });
+            }
+            const count = tempBatch.length - importIdx;
+            closeModals();
+            save();
+            render();
+            tempBatch = [];
+            importIdx = 0;
+            showToast(`${count} key(s) imported`);
+        }
+
+        // =====================
+        // Export
+        // =====================
+        function exportKeys() {
+            if (keys.length === 0) {
+                showToast('No keys to export');
+                return;
+            }
+
+            const exportData = keys.map(k => ({
+                name: k.name,
+                provider: k.provider,
+                account: k.account,
+                key: k.key
+            }));
+
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `api-keys-export-${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Keys exported');
+        }
+
+        // =====================
+        // Reset
+        // =====================
+        function showResetConfirm() {
+            showModal('resetModal');
+        }
+
+        function resetAll() {
+            keys = [];
+            localStorage.removeItem('vault_v7');
+            localStorage.removeItem('vault_compact');
+            expanded.clear();
+            document.body.classList.remove('compact');
+            document.getElementById('compactToggle').checked = false;
+            closeModals();
+            render();
+            showToast('All data cleared');
+        }
+
+        // =====================
+        // Utilities
+        // =====================
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('visible');
+            setTimeout(() => toast.classList.remove('visible'), 2000);
+        }
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>
